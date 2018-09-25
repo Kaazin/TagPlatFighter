@@ -10,6 +10,7 @@ TagManager:
   - BlastZone
   - p1
   - p2
+  - Hitbox
   layers:
   - Default
   - TransparentFX

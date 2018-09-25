@@ -5,9 +5,9 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] float speed, airdashSpeed;                        //the speed of the player
-    [SerializeField] float moveV, moveH;                              //movmeent directions fo the player                  
+    public float moveV, moveH;                              //movmeent directions fo the player                  
     [SerializeField] float maxJumpsLeft = 2, maxAirdashesLeft = 2;   //the maximum amount of jumps and airdashes the player has left
-    [SerializeField] bool grounded, goingThruPlat;                  //temp variable to show the state of isgrounded in the inspector
+    public bool grounded, goingThruPlat;                  //temp variable to show the state of isgrounded in the inspector
     [SerializeField] Vector3 offset;                              //offset of the death particle FX
     [SerializeField] Transform ltRaycastPoint, rtRaycastPoint;   //points to start raycasts from
     [SerializeField] GameObject deathFX;                         //death particle FX
@@ -21,7 +21,10 @@ public class PlayerMovement : MonoBehaviour
     public float jumpsLeft, airdashesLeft;                        //the amount of jumps and airdashes the player has by defulat
     public Animator anim;                                        //animator attacehd to the player
     public Character character;
-
+    public Quaternion groundedRot;
+    public Transform mesh;
+    public Vector3 groundedrot;
+    public string input;
     void Awake () 
     {
         //assign variables their default values
@@ -41,6 +44,10 @@ public class PlayerMovement : MonoBehaviour
 	
 	void Update ()
     {
+
+        Vector3 lookDir;
+
+        groundedrot = groundedRot.eulerAngles;
        // Debug.Log(isGrounded());
         anim.transform.localPosition = Vector3.zero;
 
@@ -51,7 +58,7 @@ public class PlayerMovement : MonoBehaviour
          moveV = Input.GetAxis("Vertical") * speed * Time.deltaTime;
 
         //if the player is grounded and we are moving in a horizontal direction
-        if (moveH != 0 && isGrounded())
+        if (moveH != 0 && isGrounded() )
         {
             //look in our direction of movement
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(dir.x,0,dir.z)), 1);
@@ -67,6 +74,7 @@ public class PlayerMovement : MonoBehaviour
         //if we are not grounded
         if(!isGrounded())
         {
+            anim.SetBool("Land", false);
             speed = character.airSpeed;
             //apply gravity
                 dir.y -= gravity * Time.deltaTime;
@@ -77,36 +85,49 @@ public class PlayerMovement : MonoBehaviour
 
         if(isGrounded() && !goingThruPlat)
         {
-            Debug.Log(69);
+            //Debug.Log(69);
 
             //if we are grounded
-            //appply no gravity and reset our dir.y back to zero
+            //apply no gravity and reset our dir.y back to zero
             //refresh the player's jumps and airdashes
 
             //if we have landed 
             if (!grounded)
             {
-                Debug.Log(69);
+                //Debug.Log(69);
                 dir.y = 0;
 
                 anim.SetBool("Jump",  false);
                 anim.SetBool("Land", true);
+                mesh.transform.rotation = groundedRot;
             }
             speed = character.groundSpeed;
             jumpsLeft = maxJumpsLeft;
             airdashesLeft = maxAirdashesLeft;
         }
+
+        if(!isGrounded())
+        {
+            if(grounded)
+            {
+                transform.rotation = groundedRot;
+            }
+        }
         grounded = isGrounded();
 
         //if we press the jump key and are either grounded or have at least 1 jumpleft
         if (Input.GetButtonDown("Jump") && (isGrounded() || (jumpsLeft > 0 && jumpsLeft >= maxJumpsLeft)))
+        {
             //Jump();
             anim.SetBool("Jump", true);
+        }
         if (Input.GetButtonDown("Jump") && (!isGrounded() || (jumpsLeft > 0 && jumpsLeft < maxJumpsLeft)))
+        {
             //double jump
             anim.SetBool("Jump", true);
+            StartCoroutine(ResetInput());
 
-
+        }
         //if we press the q key and are not grounded and have at least one air dash left
         if (Input.GetKeyDown(KeyCode.Q) && !isGrounded() && airdashesLeft > 0)
             //air dash
@@ -121,6 +142,7 @@ public class PlayerMovement : MonoBehaviour
     {
         //make the jump speed the value for dir.y
             dir.y = jumpSpeed;
+        input = "Jump";
     }
 
     //the speed of double jump will be changed once jumping is refined
@@ -142,6 +164,12 @@ public class PlayerMovement : MonoBehaviour
             goingThruPlat = true;
 
         }
+        else if (col.transform.tag == "Hitbox" && GetComponentInChildren<PlayerCombat>().parryActive)
+        {
+            GetComponentInChildren<PlayerCombat>().PlayParryFX();
+
+        }
+
     }
     void OnTriggerEnter(Collider col)
     {
@@ -195,5 +223,11 @@ public class PlayerMovement : MonoBehaviour
         //wait for about 3 frames and then stop going through the platforms
         yield return new WaitForSeconds(3 / 60);
         goingThruPlat = false;
+    }
+
+    IEnumerator ResetInput()
+    {
+        yield return new WaitForSeconds(0.15f);
+        anim.SetBool(input, false);
     }
 }
