@@ -47,6 +47,11 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 lookDir;
 
+        float dotProduct = Vector3.Dot(transform.forward, dir);
+        //if the player is moving backwards play the walking backwards animation, otherwise stop the walking backwards animation
+        bool walkB = (dotProduct < 0);
+        //if the player is moving forward play the walking forward animation, otherwise stop the walking forward animation
+        bool walkF = (dotProduct > 0);
         groundedrot = groundedRot.eulerAngles;
        // Debug.Log(isGrounded());
         anim.transform.localPosition = Vector3.zero;
@@ -60,7 +65,7 @@ public class PlayerMovement : MonoBehaviour
         //if the player is grounded and we are moving in a horizontal direction
         if (moveH != 0 && isGrounded() )
         {
-            //look in our direction of movement
+             //look in our direction of movement
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(dir.x,0,dir.z)), 1);
             anim.SetBool("Walk", true);
         }
@@ -110,7 +115,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if(grounded)
             {
-                transform.rotation = groundedRot;
+                //transform.rotation = groundedRot;
             }
         }
         grounded = isGrounded();
@@ -129,7 +134,7 @@ public class PlayerMovement : MonoBehaviour
 
         }
         //if we press the q key and are not grounded and have at least one air dash left
-        if (Input.GetKeyDown(KeyCode.Q) && !isGrounded() && airdashesLeft > 0)
+        if (Input.GetKeyDown(KeyCode.U) && !isGrounded() && airdashesLeft > 0)
             //air dash
             airdash();
 
@@ -203,7 +208,8 @@ public class PlayerMovement : MonoBehaviour
     {
         //if we have not used all our airdash
         if (airdashesLeft > 0)
-        { 
+        {
+            Debug.Log("Airdash");
             //move in the direction we are holding at the airdash speed and subtract an airdash
             dir += new Vector3(0, moveV * airdashSpeed, moveH * airdashSpeed);
             airdashesLeft--;

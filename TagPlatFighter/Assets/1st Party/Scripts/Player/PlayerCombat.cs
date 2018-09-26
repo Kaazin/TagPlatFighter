@@ -14,8 +14,11 @@ public class PlayerCombat : MonoBehaviour
     public string input;
     public AudioSource fair;
 
+    InputManager ipManager;
+
     void Awake () 
     {
+        //GameObject.Find("InputManager").GetComponent<InputManager>();
         anim = GetComponent<Animator>();
         canAttack = true;
         parryActive = false;
@@ -28,27 +31,37 @@ public class PlayerCombat : MonoBehaviour
             playerMovement.dir.z == 0 && playerMovement.moveV == 0)
         {
             anim.SetBool("Attack", true);
+            StopCoroutine(ResetAttack());
             StartCoroutine(ResetAttack());
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.dir.z != 0
             && playerMovement.moveV == 0 && canAttack && playerMovement.grounded)
         {
-            //Debug.Log("Ftilt");
-            //anim.SetBool("Ftilt", true);
+            input = "Ftilt";
+            Debug.Log("Ftilt");
+            anim.SetBool(input, true);
+            StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV > 0
              && canAttack && playerMovement.grounded)
         {
+            input = "Utilt";
             //Debug.Log("Utilt");
-            //anim.SetBool("Ftilt", true);
+            anim.SetBool(input, true);
+            StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0
            && canAttack && playerMovement.grounded)
         {
+            input = "Dtilt";
             //Debug.Log("Dtilt");
-            //anim.SetBool("Ftilt", true);
+            anim.SetBool(input, true);
+            StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
         }
         if (Input.GetKeyDown(KeyCode.P) && canAttack && !playerMovement.grounded &&
            playerMovement.dir.z == 0 && playerMovement.moveV == 0)
@@ -56,6 +69,7 @@ public class PlayerCombat : MonoBehaviour
             input = "Attack";
             //Debug.Log("Nair");
             anim.SetBool(input, true);
+            StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
         }
 
@@ -65,6 +79,7 @@ public class PlayerCombat : MonoBehaviour
             input = "Fair";
             //Debug.Log("Fair");
             anim.SetBool("Fair", true);
+            StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
 
 
@@ -75,6 +90,7 @@ public class PlayerCombat : MonoBehaviour
             input = "Bair";
             //Debug.Log("Bair");
             anim.SetBool("Bair", true);
+            StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
         }
 
@@ -84,21 +100,25 @@ public class PlayerCombat : MonoBehaviour
             input = "Uair";
             Debug.Log("Uair");
             anim.SetBool("Uair", true);
+            StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0 && playerMovement.moveH == 0f
              && canAttack && !playerMovement.grounded)
         {
             input = "Dair";
-            //anim.SetBool("Dair", true);
+            anim.SetBool("Dair", true);
+            StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
 
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0
            && canAttack && !playerMovement.grounded)
         {
-            //anim.SetBool("Ftilt", true);
-            //anim.SetBool("Ftilt", false);
+            input = "Ftilt";
+            anim.SetBool("Ftilt", true);
+            StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
         }
 
         if (Input.GetKeyDown(KeyCode.I) && canAttack)
@@ -147,7 +167,7 @@ public class PlayerCombat : MonoBehaviour
     }
     IEnumerator ResetInput()
     {
-        yield return new WaitForSeconds(0.25f);
+        yield return new WaitForSeconds(0.15f);
         anim.SetBool(input, false);
 
     }
