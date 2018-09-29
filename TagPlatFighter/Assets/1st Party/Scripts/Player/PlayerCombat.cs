@@ -13,8 +13,10 @@ public class PlayerCombat : MonoBehaviour
     PlayerMovement playerMovement;
     public string input;
     public AudioSource fair;
-
+    public float smashTimer;
+    public float smashTime;
     InputManager ipManager;
+    public bool trynaSmash;
 
     void Awake () 
     {
@@ -27,6 +29,17 @@ public class PlayerCombat : MonoBehaviour
 	
 	void Update () 
     {
+        if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+        {
+            smashTimer += Time.deltaTime;
+        }
+        if ((Mathf.Abs(playerMovement.moveH) > 0 ||
+            Mathf.Abs(playerMovement.moveV) > 0 && smashTimer >= smashTime))
+        {
+            trynaSmash = false;
+        }
+        else
+            trynaSmash = false;
         if (Input.GetKeyDown(KeyCode.P) && canAttack && playerMovement.grounded &&
             playerMovement.dir.z == 0 && playerMovement.moveV == 0)
         {
@@ -36,33 +49,89 @@ public class PlayerCombat : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.dir.z != 0
-            && playerMovement.moveV == 0 && canAttack && playerMovement.grounded)
+            && playerMovement.moveV == 0 && canAttack && playerMovement.grounded &&
+            smashTimer < smashTime)
         {
+            trynaSmash = false;
+
             input = "Ftilt";
-            Debug.Log("Ftilt");
+            //Debug.Log("Ftilt");
             anim.SetBool(input, true);
             StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
+            smashTimer = 0f;
+
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV > 0
-             && canAttack && playerMovement.grounded)
+             && canAttack && playerMovement.grounded &&
+            smashTimer < smashTime)
         {
+            trynaSmash = false;
+
             input = "Utilt";
             //Debug.Log("Utilt");
             anim.SetBool(input, true);
             StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
+            smashTimer = 0f;
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0
-           && canAttack && playerMovement.grounded)
+           && canAttack && playerMovement.grounded &&
+            smashTimer < smashTime)
         {
+            trynaSmash = false;
+
             input = "Dtilt";
             //Debug.Log("Dtilt");
             anim.SetBool(input, true);
             StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
+            smashTimer = 0f;
         }
+
+
+        if (Input.GetKeyDown(KeyCode.P) && playerMovement.dir.z != 0
+    && playerMovement.moveV == 0 && canAttack && playerMovement.grounded &&
+    smashTimer >= smashTime)
+        {
+            trynaSmash = true;
+            input = "Fsmash";
+            //Debug.Log("Fsmash");
+            anim.SetBool(input, true);
+            StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
+            smashTimer = 0f;
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV > 0
+             && canAttack && playerMovement.grounded &&
+            smashTimer >= smashTime)
+        {
+            trynaSmash = true;
+            input = "Usmash";
+            //Debug.Log("Utilt");
+            anim.SetBool(input, true);
+            StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
+            smashTimer = 0f;
+
+        }
+        if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0
+           && canAttack && playerMovement.grounded &&
+            smashTimer >= smashTime)
+        {
+            trynaSmash = true;
+            input = "Dsmash";
+            //Debug.Log("Dtilt");
+            anim.SetBool(input, true);
+            StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
+            smashTimer = 0f;
+
+        }
+
         if (Input.GetKeyDown(KeyCode.P) && canAttack && !playerMovement.grounded &&
            playerMovement.dir.z == 0 && playerMovement.moveV == 0)
         {
@@ -81,6 +150,7 @@ public class PlayerCombat : MonoBehaviour
             anim.SetBool("Fair", true);
             StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
+            smashTimer = 0f;
 
 
         }
@@ -92,6 +162,7 @@ public class PlayerCombat : MonoBehaviour
             anim.SetBool("Bair", true);
             StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
+            smashTimer = 0f;
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV > 0
@@ -102,6 +173,7 @@ public class PlayerCombat : MonoBehaviour
             anim.SetBool("Uair", true);
             StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
+            smashTimer = 0f;
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0 && playerMovement.moveH == 0f
              && canAttack && !playerMovement.grounded)
@@ -110,15 +182,17 @@ public class PlayerCombat : MonoBehaviour
             anim.SetBool("Dair", true);
             StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
+            smashTimer = 0f;
 
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0
            && canAttack && !playerMovement.grounded)
         {
-            input = "Ftilt";
-            anim.SetBool("Ftilt", true);
+            input = "Fair";
+            anim.SetBool(input, true);
             StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
+            smashTimer = 0f;
         }
 
         if (Input.GetKeyDown(KeyCode.I) && canAttack)
@@ -171,4 +245,5 @@ public class PlayerCombat : MonoBehaviour
         anim.SetBool(input, false);
 
     }
+
 }

@@ -25,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
     public Transform mesh;
     public Vector3 groundedrot;
     public string input;
+    PlayerCombat playerCombat;
     void Awake () 
     {
         //assign variables their default values
@@ -40,10 +41,12 @@ public class PlayerMovement : MonoBehaviour
         floor = LayerMask.GetMask("Floor");
         anim = GetComponentInChildren<Animator>();
         speed = character.groundSpeed;
+        playerCombat = GetComponentInChildren<PlayerCombat>();
 	}
 	
 	void Update ()
     {
+
 
         Vector3 lookDir;
 
@@ -63,14 +66,18 @@ public class PlayerMovement : MonoBehaviour
          moveV = Input.GetAxis("Vertical") * speed * Time.deltaTime;
 
         //if the player is grounded and we are moving in a horizontal direction
-        if (moveH != 0 && isGrounded() )
+        if (moveH != 0 && isGrounded() && playerCombat.smashTimer <= playerCombat.smashTime && !)
         {
+            if (playerCombat.trynaSmash = false;)
              //look in our direction of movement
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(dir.x,0,dir.z)), 1);
             anim.SetBool("Walk", true);
-        }
-        else
+            else
             anim.SetBool("Walk", false);
+
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z)), 1);
+
+
+        }
 
         //assign a value to dir
         dir = new Vector3(0, dir.y, -moveH);
