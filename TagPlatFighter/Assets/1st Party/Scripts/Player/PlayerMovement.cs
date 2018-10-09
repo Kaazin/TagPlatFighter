@@ -26,6 +26,11 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 groundedrot;
     public string input;
     PlayerCombat playerCombat;
+    public bool run;
+    public float runTimer;
+    public float runTime;
+    public float Haxis;
+    public bool sideB;
     void Awake () 
     {
         //assign variables their default values
@@ -42,11 +47,40 @@ public class PlayerMovement : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
         speed = character.groundSpeed;
         playerCombat = GetComponentInChildren<PlayerCombat>();
+        
 	}
 	
 	void Update ()
     {
+        Haxis = Mathf.Abs(Input.GetAxis("Horizontal"));
+        moveH = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
+        moveV = Input.GetAxis("Vertical") * speed * Time.deltaTime;
 
+
+        if(Haxis > 0)
+        {
+            runTimer += Time.deltaTime;
+
+            if(Haxis < 0.5f && runTimer < runTime)
+            {
+                run = false;
+                anim.SetBool("Walk", true);
+                anim.SetBool("Run", false);
+                
+            }
+            if (Haxis > 0.5f && runTimer > runTime)
+            {
+                run = true;
+                anim.SetBool("Run", false);
+                anim.SetBool("Walk", true);
+            }
+
+        }
+        else
+        {
+            runTimer = 0f;
+            run = false;
+        }
 
         Vector3 lookDir;
 
@@ -57,26 +91,36 @@ public class PlayerMovement : MonoBehaviour
         bool walkF = (dotProduct > 0);
         groundedrot = groundedRot.eulerAngles;
        // Debug.Log(isGrounded());
+       if(playerCombat.canAttack)
         anim.transform.localPosition = Vector3.zero;
 
         //show the state of isGrounded by assigning it to a public variable
 
         //assign values to moveV and moveH based on directional input from teh player
-         moveH = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
-         moveV = Input.GetAxis("Vertical") * speed * Time.deltaTime;
 
         //if the player is grounded and we are moving in a horizontal direction
-        if (moveH != 0 && isGrounded() && playerCombat.smashTimer <= playerCombat.smashTime && !)
+        if (moveH !=  0 && isGrounded())
         {
-            if (playerCombat.trynaSmash = false;)
-             //look in our direction of movement
-            anim.SetBool("Walk", true);
-            else
-            anim.SetBool("Walk", false);
+            
+                //look in our direction of movement
+                //anim.SetBool("Walk", true);
+                //anim.SetBool("Run", false);
 
+            
+           /* else if (playerCombat.trynaSmash)
+            {
+                anim.SetBool("Walk", false);
+                anim.SetBool("Run", true);
+            }
+            */
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z)), 1);
 
 
+        }
+        else
+        {
+            anim.SetBool("Walk", false);
+            anim.SetBool("Run", false);
         }
 
         //assign a value to dir
@@ -153,7 +197,7 @@ public class PlayerMovement : MonoBehaviour
     public void Jump()
     {
         //make the jump speed the value for dir.y
-            dir.y = jumpSpeed;
+         dir.y = jumpSpeed;
         input = "Jump";
     }
 
@@ -162,12 +206,18 @@ public class PlayerMovement : MonoBehaviour
     {
         //make the jump speed  the value for dir.y;
         dir.y = doubleJumpSpeeed;
+        input = "Jump";
     }
 
 
 
     void OnCollisionEnter(Collision col)
     {
+        if(col.transform.tag == "p2")
+        {
+            sideB = true;
+            Debug.Log(333);
+        }
         //if we collide with a platform and are below it
         if (col.transform.tag == "Platform" && col.transform.position.y > transform.position.y && dir.y > 0)
         {
@@ -243,4 +293,6 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(0.15f);
         anim.SetBool(input, false);
     }
+
+
 }

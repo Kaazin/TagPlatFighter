@@ -5,12 +5,13 @@ using UnityEngine;
 public class GrabRot : StateMachineBehaviour {
     public Quaternion rotation;
     public Vector3 euler;
+    public bool rotated;
 	 // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
 	override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
-        rotation = animator.transform.rotation;
+        rotation = animator.transform.parent. rotation;
         animator.GetComponentInParent<PlayerMovement>().groundedRot = rotation;
         euler = rotation.eulerAngles;
-
+        
 	}
 
 	// OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks

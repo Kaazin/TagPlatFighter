@@ -5,7 +5,22 @@ using UnityEngine;
 public class AnimatorFunctions : MonoBehaviour 
 {
     PlayerMovement playerMovment;
-	void Awake () 
+
+    public void DisableParentCol()
+    {
+        GetComponentInParent<BoxCollider>().size /= 2;
+        //playerMovment.grounded = false;
+
+    }
+    public void EnableParentCol()
+    {
+        //GetComponentInParent<BoxCollider>().enabled = true;
+        GetComponentInParent<BoxCollider>().size *= 2;
+        //playerMovment.grounded = true;
+
+    }
+
+    void Awake () 
     {
         playerMovment = GetComponentInParent<PlayerMovement>();
 

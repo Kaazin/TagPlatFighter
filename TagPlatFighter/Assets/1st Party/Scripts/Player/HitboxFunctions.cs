@@ -9,8 +9,8 @@ public class HitboxFunctions : MonoBehaviour
     public BoxCollider[] legHitboxes_L;
     public BoxCollider[] legHitboxes_R;
     public BoxCollider[] bodyHitboxes;
-
-
+    public BoxCollider[] ShockHitbox;
+    public ParticleSystem shockwaveFX;
     //enable hitbox functions
     public void EnableArmHitboxL1()
     {
@@ -91,6 +91,13 @@ public class HitboxFunctions : MonoBehaviour
         bodyHitboxes[0].enabled = true;
     }
 
+    //enable shockwave hitboxes
+    public void EnableShockwaveHitbox()
+    {
+        ShockHitbox[0].enabled = true;
+        shockwaveFX.Stop();
+        shockwaveFX.Play();
+    }
 
     //end enable hitbox functions
 
@@ -176,6 +183,13 @@ public class HitboxFunctions : MonoBehaviour
     {
         bodyHitboxes[0].enabled = false;
     }   
+
+    //disable shockwave hitbox
+    public void DisableShockwaveHitbox()
+    {
+        shockwaveFX.Stop();
+        ShockHitbox[0].enabled = false;
+    }
     //end disable body hitbox functions
     //end disable hitbox functions
 

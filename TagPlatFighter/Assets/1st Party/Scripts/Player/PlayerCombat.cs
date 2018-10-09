@@ -6,163 +6,193 @@ public class PlayerCombat : MonoBehaviour
 {
     Animator anim;          //the animator attached the player
 
-    public float resetTime;
-    public GameObject ParryFX;
-    public bool canAttack, canParry;
-    public bool parryActive;
-    PlayerMovement playerMovement;
+    public float resetTime;                //time to reset the animation
+    public GameObject ParryFX;            //The parry Particle effecc
+    public bool canAttack, canParry;     //bool to check if we can  parry and attack?
+    public bool parryActive;            //bool to check if the parry is active
+    public PlayerMovement playerMovement;     //the player movement script 
     public string input;
-    public AudioSource fair;
     public float smashTimer;
     public float smashTime;
-    InputManager ipManager;
     public bool trynaSmash;
+    //public bool justSmashed = false;
+    //public bool inputSmash;
+    //float cooldownTimer;
+    public float resetTimer;
+    public Rigidbody rb;
+    public float rushSpeed;
+    public bool isRotated;
 
+    GameObject[] hitboxes;
+
+
+
+
+//when a direction is held 
+//if the input is less than 0.5f and the timer is greater than the maximum time
+//walk
+//otherwise if the timer is greater than 0.5 and the timer is greater than the maximum time
+//run
     void Awake () 
     {
-        //GameObject.Find("InputManager").GetComponent<InputManager>();
+
+        //assign variables their default values
         anim = GetComponent<Animator>();
         canAttack = true;
         parryActive = false;
         playerMovement = GetComponentInParent<PlayerMovement>();
+        rb = GetComponentInParent<Rigidbody>();
+        hitboxes = GameObject.FindGameObjectsWithTag("p1Hitbox");
+        foreach(GameObject h in hitboxes)
+        {
+            h.GetComponent<BoxCollider>().enabled = false;
+        }
 	}
 	
+    
 	void Update () 
     {
-        if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+        if (((playerMovement.Haxis != 0 && playerMovement.moveV == 0) ||
+            (playerMovement.Haxis == 0 && playerMovement.moveV != 0)))
         {
             smashTimer += Time.deltaTime;
-        }
-        if ((Mathf.Abs(playerMovement.moveH) > 0 ||
-            Mathf.Abs(playerMovement.moveV) > 0 && smashTimer >= smashTime))
-        {
-            trynaSmash = false;
+            if (smashTimer <= smashTime)
+            {
+                trynaSmash = true;
+            }
+            else
+            {
+                trynaSmash = false;
+            }
+
         }
         else
+        {
+            smashTimer = 0;
             trynaSmash = false;
+        }
+
         if (Input.GetKeyDown(KeyCode.P) && canAttack && playerMovement.grounded &&
             playerMovement.dir.z == 0 && playerMovement.moveV == 0)
         {
+            input = "Attack";
+
             anim.SetBool("Attack", true);
-            StopCoroutine(ResetAttack());
+            //StopCoroutine(ResetAttack());
             StartCoroutine(ResetAttack());
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.dir.z != 0
-            && playerMovement.moveV == 0 && canAttack && playerMovement.grounded &&
-            smashTimer < smashTime)
+            && playerMovement.moveV == 0 && canAttack && playerMovement.grounded && !trynaSmash)
         {
-            trynaSmash = false;
-
+            canAttack = false;
             input = "Ftilt";
-            //Debug.Log("Ftilt");
-            anim.SetBool(input, true);
-            StopCoroutine(ResetInput());
+            anim.SetBool("Ftilt", true);
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
 
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV > 0
-             && canAttack && playerMovement.grounded &&
-            smashTimer < smashTime)
+             && canAttack && playerMovement.grounded && !trynaSmash)
         {
-            trynaSmash = false;
-
+            canAttack = false;
             input = "Utilt";
             //Debug.Log("Utilt");
-            anim.SetBool(input, true);
-            StopCoroutine(ResetInput());
+            anim.SetBool("Utilt", true);
+
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0
-           && canAttack && playerMovement.grounded &&
-            smashTimer < smashTime)
+           && canAttack && playerMovement.grounded && !trynaSmash)
         {
-            trynaSmash = false;
-
+            canAttack = false;
             input = "Dtilt";
             //Debug.Log("Dtilt");
-            anim.SetBool(input, true);
-            StopCoroutine(ResetInput());
+            anim.SetBool("Dtilt", true);
+
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
         }
 
 
-        if (Input.GetKeyDown(KeyCode.P) && playerMovement.dir.z != 0
-    && playerMovement.moveV == 0 && canAttack && playerMovement.grounded &&
-    smashTimer >= smashTime)
+        if (Input.GetKeyDown(KeyCode.P) && playerMovement.dir.z != 0 && playerMovement.moveV == 0 
+            && canAttack && playerMovement.grounded && trynaSmash)
         {
-            trynaSmash = true;
+            canAttack = false;
             input = "Fsmash";
             //Debug.Log("Fsmash");
-            anim.SetBool(input, true);
-            StopCoroutine(ResetInput());
+            anim.SetBool("Fsmash", true);
+            smashTimer = 0;
+
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
 
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV > 0
-             && canAttack && playerMovement.grounded &&
-            smashTimer >= smashTime)
+             && canAttack && playerMovement.grounded && trynaSmash)
         {
-            trynaSmash = true;
+            canAttack = false;
             input = "Usmash";
             //Debug.Log("Utilt");
-            anim.SetBool(input, true);
-            StopCoroutine(ResetInput());
+            anim.SetBool("Usmash", true);
+            smashTimer = 0;
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
 
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0
-           && canAttack && playerMovement.grounded &&
-            smashTimer >= smashTime)
+           && canAttack && playerMovement.grounded && trynaSmash)
         {
-            trynaSmash = true;
+            canAttack = false;
             input = "Dsmash";
             //Debug.Log("Dtilt");
-            anim.SetBool(input, true);
-            StopCoroutine(ResetInput());
-            StartCoroutine(ResetInput());
-            smashTimer = 0f;
+            anim.SetBool("Dsmash", true);
 
+            smashTimer = 0;
+            //StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
         }
 
         if (Input.GetKeyDown(KeyCode.P) && canAttack && !playerMovement.grounded &&
            playerMovement.dir.z == 0 && playerMovement.moveV == 0)
         {
+            canAttack = false;
             input = "Attack";
             //Debug.Log("Nair");
-            anim.SetBool(input, true);
-            StopCoroutine(ResetInput());
+            anim.SetBool("Attack", true);
+
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.GetComponent<Rigidbody>().velocity.z > 0
             && playerMovement.moveV == 0 && canAttack && !playerMovement.grounded)
         {
+            canAttack = false;
             input = "Fair";
             //Debug.Log("Fair");
             anim.SetBool("Fair", true);
-            StopCoroutine(ResetInput());
+
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
+            //smashTimer = 0f;
 
 
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.GetComponent<Rigidbody>().velocity.z < 0
             && playerMovement.moveV == 0 && canAttack && !playerMovement.grounded)
         {
+            canAttack = false;
             input = "Bair";
             //Debug.Log("Bair");
             anim.SetBool("Bair", true);
-            StopCoroutine(ResetInput());
+
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
+            //smashTimer = 0f;
         }
 
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV > 0
@@ -171,30 +201,83 @@ public class PlayerCombat : MonoBehaviour
             input = "Uair";
             Debug.Log("Uair");
             anim.SetBool("Uair", true);
-            StopCoroutine(ResetInput());
+            resetTimer += Time.deltaTime;
+            if (resetTimer >= resetTime)
+                anim.SetBool("Uair", false);
+
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
+            //smashTimer = 0f;
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0 && playerMovement.moveH == 0f
              && canAttack && !playerMovement.grounded)
         {
             input = "Dair";
             anim.SetBool("Dair", true);
-            StopCoroutine(ResetInput());
+            resetTimer += Time.deltaTime;
+
+            //StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
+            //smashTimer = 0f;
 
         }
         if (Input.GetKeyDown(KeyCode.P) && playerMovement.moveV < 0
            && canAttack && !playerMovement.grounded)
         {
             input = "Fair";
-            anim.SetBool(input, true);
+            anim.SetBool("Fair", true);
+            resetTimer += Time.deltaTime;
+            if (resetTimer >= resetTime)
+                anim.SetBool("Fair", false);
+
             StopCoroutine(ResetInput());
             StartCoroutine(ResetInput());
-            smashTimer = 0f;
+            //smashTimer = 0f;
         }
 
+        if (Input.GetKeyDown(KeyCode.O) && canAttack &&
+           playerMovement.dir.z == 0 && playerMovement.moveV == 0)
+        {
+            input = "Nspec";
+            anim.SetBool("Nspec", true);
+
+            //StopCoroutine(ResetAttack());
+            StartCoroutine(ResetInput());
+        }
+
+        if (Input.GetKeyDown(KeyCode.O) && playerMovement.dir.z != 0
+            && playerMovement.moveV == 0 && canAttack)
+        {
+            canAttack = false;
+            input = "Fspec";
+            anim.SetBool("Fspec", true);
+            //StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.O) && playerMovement.moveV > 0
+             && canAttack)
+        {
+            canAttack = false;
+            input = "Uspec";
+            //Debug.Log("Utilt");
+            anim.SetBool("Uspec", true);
+
+            //StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
+        }
+        if (Input.GetKeyDown(KeyCode.O) && playerMovement.moveV < 0
+           && canAttack)
+        {
+            canAttack = false;
+            input = "Dspec";
+            //Debug.Log("Dtilt");
+            anim.SetBool("Dspec", true);
+
+            //StopCoroutine(ResetInput());
+            StartCoroutine(ResetInput());
+        }
         if (Input.GetKeyDown(KeyCode.I) && canAttack)
         {
             StartCoroutine(ActivateParry());
@@ -243,7 +326,28 @@ public class PlayerCombat : MonoBehaviour
     {
         yield return new WaitForSeconds(0.15f);
         anim.SetBool(input, false);
+        canAttack = true;
 
+    }
+    public void Fspec()
+    {
+        //make the jump speed the value for dir.y
+        playerMovement.dir.z = rushSpeed;
+        input = "Fspec";
+        playerMovement.enabled = false;
+    }
+
+    public void ZeroDir()
+    {
+        playerMovement.enabled = true;
+        playerMovement.dir = Vector3.zero;
+        playerMovement.enabled = false;
+        rb.velocity = Vector3.zero;
+    }
+
+    public void EnableMovement()
+    {
+        playerMovement.enabled = true;
     }
 
 }
